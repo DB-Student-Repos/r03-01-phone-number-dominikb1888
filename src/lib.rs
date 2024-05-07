@@ -1,47 +1,28 @@
 pub fn number(user_number: &str) -> Option<String> {
-    pub fn number(user_number: &str) -> Option<String> {
-    // this removes remove non-digit characters
-    let cleaned_number: String = user_number.chars().filter(|c| c.is_digit(10)).collect();
+    let mut cleaned_number: String = user_number.chars().filter(|c| c.is_digit(10)).collect();
 
-    // Check if the cleaned number has a valid length
-    match cleaned_number.len() {
-
-        // If the length is 10 or 11, continue validation
-        10 | 11 => {
-            // Check if the number starts with '1'. If so, remove it.
-            let mut digits_iter = cleaned_number.chars();
-            let mut formatted_number = String::new();
-            if cleaned_number.len() == 11 {
-                if digits_iter.next()? != '1' {
-                    return None;
-                }
-            }
-
-            // Check if the area code and exchange code meet the NANP criteria
-
-            let area_code = digits_iter.by_ref().take(3).collect::<String>();
-            let exchange_code = digits_iter.by_ref().take(3).collect::<String>();
-            let remaining_digits = digits_iter.collect::<String>();
-
-            if area_code.starts_with('0') || area_code.starts_with('1')
-                || exchange_code.starts_with('0') || exchange_code.starts_with('1')
-            {
-                return None;
-            }
-
-            // Check if the remaining digits are correct
-
-            if remaining_digits.len() != 4 {
-                return None;
-            }
-
-            formatted_number.push_str(&area_code);
-            formatted_number.push_str(&exchange_code);
-            formatted_number.push_str(&remaining_digits);
-
-            Some(formatted_number)
-        }
-        // If the length is not 10 or 11, return None
-        _ => None,
+    if ["0", "1"].iter().any(|s| cleaned_number.starts_with(*s)) {
+        cleaned_number.take(1)
     }
+
+    if cleaned_number.len() == 10 {
+        check_10_digits(cleaned_number)
+    }
+
+    None
+}
+
+pub fn check_10_digits(cleaned_number: String) -> Option<String> {
+    let digits_iter = cleaned_number.chars();
+    [area_code, exchange_code, remaining_digits] = [digits_iter[0:2], digits_iter[3:5], digits_iter[5:9]]
+
+    if any(
+        ["0", "1"].iter().any(|s| area_code.starts_with(*s)),
+        ["0", "1"].iter().any(|s| exchange_code.starts_with(*s)),
+        remaining_digits.len() != 4)
+    {
+        return None;
+    }
+
+    Some(format!({}{}{}, area_code, exchange_code, remaining_digits))
 }}
